@@ -1,10 +1,17 @@
 from bs4 import BeautifulSoup
 import requests
+import sys
 
-page_index = [1]
-page_end = 5
+category = sys.argv[1]
+
+try:
+    page_index = [int(sys.argv[2])]
+    page_end = int(sys.argv[3])
+except:
+    print('The second and third arguments must be a number but not string!')
+
 PAGE_DOMAIN = 'http://wallpaperswide.com'
-PAGE_URL = 'http://wallpaperswide.com/aero-desktop-wallpapers/page/'
+PAGE_URL = 'http://wallpaperswide.com/' + category + '-desktop-wallpapers/page/'
 
 def visit_page(url):
     headers = {
@@ -18,36 +25,45 @@ def visit_page(url):
 def get_paper_link(page):
     links = page.select('#content > div > ul > li > div > div a')
     collect = []
+
     for link in links:
         collect.append(link.get('href'))
+
     return collect
 
 def download_wallpaper(link, index, total, callback):
     wallpaper_source = visit_page(PAGE_DOMAIN + link)
     wallpaper_size_links = wallpaper_source.select('#wallpaper-resolutions > a')
     size_list = []
+
     for link in wallpaper_size_links:
+        href = link.get('href')
         size_list.append({
             'size': eval(link.get_text().replace('x', '*')),
-            'name': link.get('href').replace('/download/', ''),
-            'url': link.get('href')
+            'name': href.replace('/download/', ''),
+            'url': href
         })
+
     biggest_one = max(size_list, key = lambda item: item['size'])
-    print('Downloading the ' + str(index + 1) + '/' + str(total) + ' wallpaper...')
-    if index + 1 == total:
-        print('Download completed!')
-        callback()
+    print('Downloading the ' + str(index + 1) + '/' + str(total) + ' wallpaper: ' + biggest_one['name'])
     result = requests.get(PAGE_DOMAIN + biggest_one['url'])
+
     if result.status_code == 200:
         open('wallpapers/' + biggest_one['name'], 'wb').write(result.content)
 
+    if index + 1 == total:
+        print('Download completed!\n\n')
+        callback()
+
 def start():
     if page_index[0] <= page_end:
-        print('Preparing to download the ' + str(page_index[0])  + ' page of all the wallpapers...')
+        print('Preparing to download the ' + str(page_index[0])  + ' page of all the "' + category + '" wallpapers...')
         PAGE_SOURCE = visit_page(PAGE_URL + str(page_index[0]))
         WALLPAPER_LINKS = get_paper_link(PAGE_SOURCE)
         page_index[0] = page_index[0] + 1
+
         for index, link in enumerate(WALLPAPER_LINKS):
             download_wallpaper(link, index, len(WALLPAPER_LINKS), start)
 
-start()
+if __name__ == '__main__':
+     start()
