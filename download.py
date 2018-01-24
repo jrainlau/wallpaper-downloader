@@ -2,13 +2,18 @@ from bs4 import BeautifulSoup
 import requests
 import sys
 
+if len(sys.argv) != 4:
+    print('3 arguments were required but only find ' + str(len(sys.argv) - 1) + '!')
+    exit()
+
 category = sys.argv[1]
 
 try:
-    page_index = [int(sys.argv[2])]
+    page_start = [int(sys.argv[2])]
     page_end = int(sys.argv[3])
 except:
-    print('The second and third arguments must be a number but not string!')
+    print('The second and third arguments must be a number but not a string!')
+    exit()
 
 PAGE_DOMAIN = 'http://wallpaperswide.com'
 PAGE_URL = 'http://wallpaperswide.com/' + category + '-desktop-wallpapers/page/'
@@ -56,11 +61,11 @@ def download_wallpaper(link, index, total, callback):
         callback()
 
 def start():
-    if page_index[0] <= page_end:
-        print('Preparing to download the ' + str(page_index[0])  + ' page of all the "' + category + '" wallpapers...')
-        PAGE_SOURCE = visit_page(PAGE_URL + str(page_index[0]))
+    if page_start[0] <= page_end:
+        print('Preparing to download the ' + str(page_start[0])  + ' page of all the "' + category + '" wallpapers...')
+        PAGE_SOURCE = visit_page(PAGE_URL + str(page_start[0]))
         WALLPAPER_LINKS = get_paper_link(PAGE_SOURCE)
-        page_index[0] = page_index[0] + 1
+        page_start[0] = page_start[0] + 1
 
         for index, link in enumerate(WALLPAPER_LINKS):
             download_wallpaper(link, index, len(WALLPAPER_LINKS), start)
