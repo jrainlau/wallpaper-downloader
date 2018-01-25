@@ -24,30 +24,20 @@ def visit_page(url):
     }
     r = requests.get(url, headers = headers)
     r.encoding = 'utf-8'
-    soup = BeautifulSoup(r.text, 'lxml')
-    return soup
+    return BeautifulSoup(r.text, 'lxml')
 
 def get_paper_link(page):
     links = page.select('#content > div > ul > li > div > div a')
-    collect = []
-
-    for link in links:
-        collect.append(link.get('href'))
-
-    return collect
+    return [link.get('href') for link in links]
 
 def download_wallpaper(link, index, total, callback):
     wallpaper_source = visit_page(PAGE_DOMAIN + link)
     wallpaper_size_links = wallpaper_source.select('#wallpaper-resolutions > a')
-    size_list = []
-
-    for link in wallpaper_size_links:
-        href = link.get('href')
-        size_list.append({
-            'size': eval(link.get_text().replace('x', '*')),
-            'name': href.replace('/download/', ''),
-            'url': href
-        })
+    size_list = [{
+        'size': eval(link.get_text().replace('x', '*')),
+        'name': link.get('href').replace('/download/', ''),
+        'url': link.get('href')
+    } for link in wallpaper_size_links]
 
     biggest_one = max(size_list, key = lambda item: item['size'])
     print('Downloading the ' + str(index + 1) + '/' + str(total) + ' wallpaper: ' + biggest_one['name'])
