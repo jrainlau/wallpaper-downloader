@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf8 -*-
+
+from os import mkdir, chdir
+from os.path import exists
 from bs4 import BeautifulSoup
 import requests
 import sys
@@ -6,6 +11,7 @@ if len(sys.argv) != 4:
     print('3 arguments were required but only find ' + str(len(sys.argv) - 1) + '!')
     exit()
 
+base_dir = 'wallpapers'
 category = sys.argv[1]
 
 try:
@@ -14,6 +20,13 @@ try:
 except:
     print('The second and third arguments must be a number but not a string!')
     exit()
+
+if not exists(base_dir):
+    mkdir(base_dir)        # /wallpapers
+chdir(base_dir)
+if not exists(category):
+    mkdir(category)        # /wallpapers/<category name>
+chdir(category)
 
 PAGE_DOMAIN = 'http://wallpaperswide.com'
 PAGE_URL = 'http://wallpaperswide.com/' + category + '-desktop-wallpapers/page/'
@@ -44,15 +57,15 @@ def download_wallpaper(link, index, total, callback):
     result = requests.get(PAGE_DOMAIN + biggest_one['url'])
 
     if result.status_code == 200:
-        open('wallpapers/' + biggest_one['name'], 'wb').write(result.content)
+        open(biggest_one['name'], 'wb').write(result.content)
 
     if index + 1 == total:
-        print('Download completed!\n\n')
+        print('Download completed!\n')
         callback()
 
 def start():
     if page_start[0] <= page_end:
-        print('Preparing to download the ' + str(page_start[0])  + ' page of all the "' + category + '" wallpapers...')
+        print('\nPreparing to download the {} page of all the {} wallpapers...'.format(page_start[0],category))
         PAGE_SOURCE = visit_page(PAGE_URL + str(page_start[0]))
         WALLPAPER_LINKS = get_paper_link(PAGE_SOURCE)
         page_start[0] = page_start[0] + 1
