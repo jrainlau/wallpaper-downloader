@@ -24,6 +24,7 @@ except:
 if not exists(base_dir):
     mkdir(base_dir)        # /wallpapers
 chdir(base_dir)
+
 if not exists(category):
     mkdir(category)        # /wallpapers/<category name>
 chdir(category)
@@ -65,7 +66,7 @@ def download_wallpaper(link, index, total, callback):
 
 def start():
     if page_start[0] <= page_end:
-        print('\nPreparing to download the {} page of all the {} wallpapers...'.format(page_start[0],category))
+        print('\nPreparing to download the {} page of all the {} wallpapers...'.format(page_start[0], category))
         PAGE_SOURCE = visit_page(PAGE_URL + str(page_start[0]))
         WALLPAPER_LINKS = get_paper_link(PAGE_SOURCE)
         page_start[0] = page_start[0] + 1
